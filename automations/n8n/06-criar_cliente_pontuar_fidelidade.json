@@ -1,0 +1,354 @@
+{
+  "name": "MV-Criar cliente e/ou pontuar do plano fidelidade.",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Criar cliente e/ou pontuar do plano fidelidade.",
+        "height": 540,
+        "width": 1540,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        12016,
+        -256
+      ],
+      "id": "feb41aeb-87a1-41f5-af97-90356820217e",
+      "name": "Sticky Note29"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "carteiras_fidelidade",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "cliente_id",
+              "keyValue": "={{ $('Criar Venda').item.json.cliente_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        12288,
+        -144
+      ],
+      "id": "b7ed53b1-6b4f-4741-a982-dc8961859802",
+      "name": "Buscar Cadastro Fidelidade",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "D3sjcqUXg63iS7HA",
+          "name": "Mundo Verde"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e59af3f8-0a38-49cc-ab71-51430143ed73",
+              "leftValue": "={{ $json.cliente_id }}",
+              "rightValue": "True",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        12496,
+        -144
+      ],
+      "id": "2a828ac3-6c19-41bb-b15e-dc476565a9fd",
+      "name": "Cadastro Fidelidade Existe?"
+    },
+    {
+      "parameters": {
+        "tableId": "carteiras_fidelidade",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "cliente_id",
+              "fieldValue": "={{ $('Criar Venda').item.json.cliente_id }}"
+            },
+            {
+              "fieldId": "saldo_gerado_venda",
+              "fieldValue": "= {{ $('Criar Venda').item.json.valor_liquido }}"
+            },
+            {
+              "fieldId": "saldo_atual",
+              "fieldValue": "={{ $('Criar Venda').item.json.valor_liquido }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "ativa"
+            },
+            {
+              "fieldId": "saldo_total_gerado",
+              "fieldValue": "={{ $('Criar Venda').item.json.valor_liquido }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        12704,
+        32
+      ],
+      "id": "b9f71670-8b31-4807-ad98-dee0b54043a3",
+      "name": "Criar Cadastro Fidelidade",
+      "credentials": {
+        "supabaseApi": {
+          "id": "D3sjcqUXg63iS7HA",
+          "name": "Mundo Verde"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "carteiras_fidelidade",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "cliente_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.cliente_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "saldo_gerado_venda",
+              "fieldValue": "={{ $json.saldo_gerado_venda }}"
+            },
+            {
+              "fieldId": "saldo_atual",
+              "fieldValue": "={{$json.saldo_atual + $json.saldo_gerado_venda - $json.saldo_utilizado_venda}}"
+            },
+            {
+              "fieldId": "saldo_total_gerado",
+              "fieldValue": "={{ $json.saldo_total_gerado + $json.saldo_gerado_venda }}"
+            },
+            {
+              "fieldId": "saldo_utilizado_venda",
+              "fieldValue": "={{ $json.saldo_utilizado_venda }}"
+            },
+            {
+              "fieldId": "saldo_total_utilizado",
+              "fieldValue": "={{ $json.saldo_total_utilizado + $json.saldo_utilizado_venda}}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        12704,
+        -160
+      ],
+      "id": "5b5e6566-8103-4db9-a145-45cf315a2cee",
+      "name": "Cadastrar Pontuação",
+      "credentials": {
+        "supabaseApi": {
+          "id": "D3sjcqUXg63iS7HA",
+          "name": "Mundo Verde"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        13280,
+        -80
+      ],
+      "id": "f9afc0c6-6fd4-49fb-bc7f-a485069b1c52",
+      "name": "No Operation, do nothing10",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3DFEBE36A1E1508087A00A1EFCACDE10/token/9C5113FC16177AAF095B4B8F/send-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "=55{{ $('Converter Intenção em Índice').item.json.telefone }}"
+            },
+            {
+              "name": "message",
+              "value": "=Cadastro realizado com sucesso! 🎉\n\nOlá,  {{ $('Roteador de Intenção').item.json.nome }}, sua pontuação agora é de {{ $json.saldo_atual }} pontos.\n\nNão se esqueça de resgatar na sua próxima compra."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b4139985-e397-4cc1-93c4-0418510e7a6b",
+      "name": "(Z-API) Enviar Mensagem5",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        13088,
+        -80
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "KvCDLSGblTBp6Bka",
+          "name": "Z-API Tutorial NoCOde"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "cliente_id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        12064,
+        -144
+      ],
+      "id": "4bd2c2b9-ba3e-4a7d-b53b-46aedec066a6",
+      "name": "Aggregate"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Buscar vendas Microvix",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Cadastro Fidelidade": {
+      "main": [
+        [
+          {
+            "node": "Cadastro Fidelidade Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cadastro Fidelidade Existe?": {
+      "main": [
+        [
+          {
+            "node": "Cadastrar Pontuação",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Criar Cadastro Fidelidade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Cadastro Fidelidade": {
+      "main": [
+        [
+          {
+            "node": "(Z-API) Enviar Mensagem5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cadastrar Pontuação": {
+      "main": [
+        [
+          {
+            "node": "(Z-API) Enviar Mensagem5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "(Z-API) Enviar Mensagem5": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Buscar Cadastro Fidelidade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "7e730088-aae8-4263-9ebd-7e528d8db86f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "53f6b7e07318319721b1ec8dbac58f486a49cd122513114117377dccf7fc17a0"
+  },
+  "id": "yzNj926msTmn5bBk",
+  "tags": [
+    {
+      "updatedAt": "2026-03-19T17:15:54.547Z",
+      "createdAt": "2026-03-19T17:15:54.547Z",
+      "id": "6Jq6PP6Ierj2roEk",
+      "name": "Mundo Verde"
+    }
+  ]
+}

@@ -1,0 +1,316 @@
+{
+  "name": "MV-Buscar e cadastrar cliente",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Buscar e cadastrar o cliente",
+        "height": 540,
+        "width": 1012,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        8528,
+        -256
+      ],
+      "id": "00f14a2f-fb93-464f-87b2-c7a9eee54271",
+      "name": "Sticky Note27"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3DFEBE36A1E1508087A00A1EFCACDE10/token/9C5113FC16177AAF095B4B8F/send-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "=55{{ $('Converter Intenção em Índice').item.json.telefone }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.error }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "74e8c162-771e-49c0-847f-ad422028bae7",
+      "name": "(Z-API) Enviar Mensagem1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        9248,
+        80
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "KvCDLSGblTBp6Bka",
+          "name": "Z-API Tutorial NoCOde"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        9424,
+        80
+      ],
+      "id": "0f543e43-897b-4af3-b55b-389a6aa6ff9d",
+      "name": "No Operation, do nothing7",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "clientes",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "cpf",
+              "condition": "eq",
+              "keyValue": "={{ $json.cpf }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        8544,
+        -80
+      ],
+      "id": "eb6a06f5-ba2f-4c58-96c4-1aeb83c3a3ab",
+      "name": "Buscar Cliente CPF",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "D3sjcqUXg63iS7HA",
+          "name": "Mundo Verde"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nif (items.length > 0 && items[0].json.id) {\n  return [{ json: { cliente_encontrado: true, cliente_id: items[0].json.id } }];\n}\n\nreturn [{ json: { cliente_encontrado: false } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8720,
+        -80
+      ],
+      "id": "47c8965f-9f2f-434a-8682-06a4ffd0dbca",
+      "name": "Verificar Cliente Encontrado"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5f7a6d8f-ec16-407d-aa23-7c15a6bad9ed",
+              "leftValue": "={{ $json.cliente_encontrado }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        8896,
+        -80
+      ],
+      "id": "09d92b83-2672-4894-8ed5-9fe30341e3aa",
+      "name": "Cliente já cadastrado?"
+    },
+    {
+      "parameters": {
+        "tableId": "clientes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "cpf",
+              "fieldValue": "={{ $('Converter Intenção em Índice').item.json.cpf }}"
+            },
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ $('Converter Intenção em Índice').item.json.telefone }}"
+            },
+            {
+              "fieldId": "nome_completo",
+              "fieldValue": "={{ $('Converter Intenção em Índice').item.json.nome }}"
+            },
+            {
+              "fieldId": "canal_origem",
+              "fieldValue": "whatsapp"
+            },
+            {
+              "fieldId": "aceita_whatsapp",
+              "fieldValue": "true"
+            },
+            {
+              "fieldId": "data_nascimento",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.data_nascimento_iso }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        9056,
+        64
+      ],
+      "id": "5b2013d1-9e0e-4732-b459-cd91ce154dd2",
+      "name": "Criar Cliente",
+      "notesInFlow": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "D3sjcqUXg63iS7HA",
+          "name": "Mundo Verde"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "notes": "Erro nos dados de cadastro, favor enviar novamente"
+    },
+    {
+      "parameters": {
+        "jsCode": "let clienteId = null;\n\n// 1. Cliente já existente\ntry {\n  const existente = $('Verificar Cliente Encontrado').first().json;\n\n  if (existente.cliente_encontrado && existente.cliente_id) {\n    clienteId = existente.cliente_id;\n  }\n} catch (e) {}\n\n// 2. Cliente criado agora\nif (!clienteId) {\n  try {\n    const criado = $('Criar Cliente').first().json;\n\n    if (criado.id) {\n      clienteId = criado.id;\n    }\n  } catch (e) {}\n}\n\n// 🚨 VALIDAÇÃO FORTE (evita erro no Supabase)\nif (!clienteId) {\n  throw new Error('Cliente não encontrado nem criado. Não é possível continuar.');\n}\n\nreturn [\n  {\n    json: {\n      cliente_id: clienteId\n    }\n  }\n];;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9200,
+        -96
+      ],
+      "id": "7cc8d02a-0c32-403d-b205-d5217d33c0dd",
+      "name": "Consolidar Cliente ID"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Buscar vendas Microvix",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "(Z-API) Enviar Mensagem1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Cliente CPF": {
+      "main": [
+        [
+          {
+            "node": "Verificar Cliente Encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Cliente Encontrado": {
+      "main": [
+        [
+          {
+            "node": "Cliente já cadastrado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cliente já cadastrado?": {
+      "main": [
+        [
+          {
+            "node": "Consolidar Cliente ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Criar Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Cliente": {
+      "main": [
+        [
+          {
+            "node": "Consolidar Cliente ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "(Z-API) Enviar Mensagem1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar Cliente ID": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "9812f928-e625-4d7d-a8bd-7be937b94d55",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "53f6b7e07318319721b1ec8dbac58f486a49cd122513114117377dccf7fc17a0"
+  },
+  "id": "lGObsNbIuZS0AdnI",
+  "tags": [
+    {
+      "updatedAt": "2026-03-19T17:15:54.547Z",
+      "createdAt": "2026-03-19T17:15:54.547Z",
+      "id": "6Jq6PP6Ierj2roEk",
+      "name": "Mundo Verde"
+    }
+  ]
+}

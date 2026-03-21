@@ -1,0 +1,225 @@
+{
+  "name": "MV-Verificar se cupom já foi cadastrado",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3DFEBE36A1E1508087A00A1EFCACDE10/token/9C5113FC16177AAF095B4B8F/send-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "=55{{ $('Verificar Número Alvo').item.json.telefone }}"
+            },
+            {
+              "name": "message",
+              "value": "=Nota fiscal já cadastrada."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f94f0ec2-92ec-4e0c-85b6-b0f07b028ccc",
+      "name": "(Z-API) Enviar Mensagem2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        10112,
+        -224
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "KvCDLSGblTBp6Bka",
+          "name": "Z-API Tutorial NoCOde"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        10272,
+        -224
+      ],
+      "id": "ac4e3d2b-45b5-4b80-a802-b4086dfaf7d7",
+      "name": "No Operation, do nothing8",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "vendas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "microvix_venda_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Code in JavaScript').item.json.nota_fiscal }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        9584,
+        -64
+      ],
+      "id": "65ebf173-5095-41c1-892a-336fdcd27cf1",
+      "name": "Encontrar Cupom",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "D3sjcqUXg63iS7HA",
+          "name": "Mundo Verde"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// procura um item realmente válido\nconst registroValido = items.find(item =>\n  item.json &&\n  item.json.id &&\n  item.json.numero_cupom\n);\n\nif (registroValido) {\n  return [\n    {\n      json: {\n        cupom_existe: true,\n        venda_id: registroValido.json.id,\n        numero_cupom: registroValido.json.numero_cupom\n      }\n    }\n  ];\n}\n\nreturn [\n  {\n    json: {\n      cupom_existe: false\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9760,
+        -64
+      ],
+      "id": "fd604036-a7c2-4b4b-9330-496b1093b7d3",
+      "name": "Verificar Cupom Encontrado"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6ec3854a-673b-48da-93a2-ce29c7b65cb6",
+              "leftValue": "={{ $json.cupom_existe }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        9936,
+        -64
+      ],
+      "id": "cbeceda8-e7b2-4381-9e46-f4bff4bb3083",
+      "name": "Cupom Cadastrado?"
+    },
+    {
+      "parameters": {
+        "content": "## Buscar se cupom já foi cadastrado",
+        "height": 540,
+        "width": 868,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        9552,
+        -256
+      ],
+      "id": "1e0cfc50-35f8-4d2a-8251-d2d6cbe1815d",
+      "name": "Sticky Note30"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Buscar vendas Microvix",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "(Z-API) Enviar Mensagem2": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Encontrar Cupom": {
+      "main": [
+        [
+          {
+            "node": "Verificar Cupom Encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Cupom Encontrado": {
+      "main": [
+        [
+          {
+            "node": "Cupom Cadastrado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cupom Cadastrado?": {
+      "main": [
+        [
+          {
+            "node": "(Z-API) Enviar Mensagem2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "eb0c38b6-59ec-47ff-ae69-223ee305a2b3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "53f6b7e07318319721b1ec8dbac58f486a49cd122513114117377dccf7fc17a0"
+  },
+  "id": "RmDnIYLFPrAneEFq",
+  "tags": [
+    {
+      "updatedAt": "2026-03-19T17:15:54.547Z",
+      "createdAt": "2026-03-19T17:15:54.547Z",
+      "id": "6Jq6PP6Ierj2roEk",
+      "name": "Mundo Verde"
+    }
+  ]
+}

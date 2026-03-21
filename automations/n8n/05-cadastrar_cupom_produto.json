@@ -1,0 +1,435 @@
+{
+  "name": "MV-Cadastrar cupom e produto",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Cadastrar cupom e produtos",
+        "height": 540,
+        "width": 1540,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10448,
+        -256
+      ],
+      "id": "9546b51d-922b-47c2-81be-bb18fe5184c1",
+      "name": "Sticky Note28"
+    },
+    {
+      "parameters": {
+        "tableId": "vendas",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "cliente_id",
+              "fieldValue": "={{ $('Consolidar Cliente ID').item.json.cliente_id }}"
+            },
+            {
+              "fieldId": "canal_venda",
+              "fieldValue": "=whatsapp"
+            },
+            {
+              "fieldId": "data_venda",
+              "fieldValue": "={{ $('Verificar Número Alvo').item.json.data_emissao_iso }}"
+            },
+            {
+              "fieldId": "valor_bruto",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.valor_bruto }}"
+            },
+            {
+              "fieldId": "desconto",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.desconto_total }}"
+            },
+            {
+              "fieldId": "valor_liquido",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.valor_total_nota }}"
+            },
+            {
+              "fieldId": "forma_pagamento",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.forma_pagamento }}"
+            },
+            {
+              "fieldId": "cliente_identificado",
+              "fieldValue": "=true"
+            },
+            {
+              "fieldId": "numero_cupom",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.nota_fiscal }}"
+            },
+            {
+              "fieldId": "imagem_cupom_url",
+              "fieldValue": "={{ $('HTTP Request1').item.json.Documento }}"
+            },
+            {
+              "fieldId": "origem_registro",
+              "fieldValue": "=manual_whatsapp"
+            },
+            {
+              "fieldId": "microvix_venda_id",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.nota_fiscal }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        10464,
+        -96
+      ],
+      "id": "99352bda-20af-4819-a330-bcd23cfa49b7",
+      "name": "Criar Venda",
+      "credentials": {
+        "supabaseApi": {
+          "id": "D3sjcqUXg63iS7HA",
+          "name": "Mundo Verde"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const origem = $('Code in JavaScript').first().json;\nconst linhas = Array.isArray(origem.linhas_pdf) ? origem.linhas_pdf : [];\n\nfunction toNumberBr(value) {\n  if (value === null || value === undefined || value === \"\") return null;\n  const str = String(value).trim();\n  const num = Number(str.replace(/\\./g, \"\").replace(\",\", \".\"));\n  return Number.isNaN(num) ? null : num;\n}\n\nconst produtos = [];\n\n// código do produto: linha só com números, de 8 a 14 dígitos\nfunction isCodigoProduto(linha) {\n  return /^\\d{8,14}$/.test(String(linha).trim());\n}\n\n// linha de valores do item\nfunction extrairDadosLinhaFinal(linha) {\n  const texto = String(linha).trim();\n\n  const match = texto.match(\n    /(?:\\d+[.,]\\d+|\\d{3})\\s+\\d{4}\\s+(UN|KG|CX|PT|FD|PC)\\s+(\\d+,\\d{2,3})\\s+(\\d+,\\d{2})\\s+(\\d+,\\d{2})\\s+(\\d+,\\d{2})/i\n  );\n\n  if (!match) return null;\n\n  return {\n    quantidade: Number(String(match[2]).replace(\",\", \".\")),\n    valor_unitario: toNumberBr(match[3]),\n  };\n}\n\nfor (let i = 0; i < linhas.length; i++) {\n  const linha = String(linhas[i]).trim();\n\n  if (!isCodigoProduto(linha)) continue;\n\n  const codigo = linha;\n  let dadosItem = null;\n\n  for (let j = i + 1; j < Math.min(i + 20, linhas.length); j++) {\n    const candidato = extrairDadosLinhaFinal(linhas[j]);\n    if (candidato) {\n      dadosItem = candidato;\n      break;\n    }\n\n    if (j > i + 1 && isCodigoProduto(linhas[j])) {\n      break;\n    }\n  }\n\n  if (dadosItem) {\n    produtos.push({\n      codigo,\n      quantidade: dadosItem.quantidade,\n      valor_unitario: dadosItem.valor_unitario,\n    });\n  }\n}\n\n// remove duplicados\nconst unicos = [];\nconst vistos = new Set();\n\nfor (const p of produtos) {\n  const chave = `${p.codigo}|${p.quantidade}|${p.valor_unitario}`;\n  if (!vistos.has(chave)) {\n    vistos.add(chave);\n    unicos.push(p);\n  }\n}\n\nreturn [\n  {\n    json: {\n      produtos: unicos\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10624,
+        -96
+      ],
+      "id": "9ffdee8f-bd72-4ffc-9385-45babac9daa5",
+      "name": "Preparar Itens Venda"
+    },
+    {
+      "parameters": {
+        "jsCode": "const produtos = $('Preparar Itens Venda').first().json.produtos || [];\n\nreturn produtos.map(p => ({\n  json: {\n    codigo: p.codigo,\n    quantidade: p.quantidade,\n    valor_unitario: p.valor_unitario\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10816,
+        -96
+      ],
+      "id": "eced2a23-b7de-4257-941d-fce4b5369b39",
+      "name": "Explodir produtos"
+    },
+    {
+      "parameters": {
+        "jsCode": "const itensOriginais = $items('Explodir produtos').map(item => item.json);\nconst itensEncontrados = $items('Procurar produto').map(item => item.json);\n\n// microvix_id que realmente voltaram do banco\nconst encontradosSet = new Set(\n  itensEncontrados\n    .map(item => String(item.microvix_id || '').trim())\n    .filter(Boolean)\n);\n\n// compara todos os códigos originais com os encontrados\nconst naoEncontrados = itensOriginais.filter(item => {\n  const codigo = String(item.codigo || '').trim();\n  return !encontradosSet.has(codigo);\n});\n\nreturn [\n  {\n    json: {\n      total_originais: itensOriginais.length,\n      total_encontrados: itensEncontrados.length,\n      total_nao_encontrados: naoEncontrados.length,\n      encontrados: itensEncontrados.map(item => String(item.microvix_id || '').trim()),\n      nao_encontrados: naoEncontrados.map(item => String(item.codigo || '').trim()),\n      todos_encontrados: naoEncontrados.length === 0,\n      mensagem:\n        naoEncontrados.length === 0\n          ? 'Todos os produtos foram encontrados na planilha.'\n          : naoEncontrados\n              .map(item => `Produto do código ${item.codigo} não foi encontrado na planilha.`)\n              .join(' ')\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11184,
+        -96
+      ],
+      "id": "f72e31e1-3123-4c34-a127-a63e32d00490",
+      "name": "Verificar produtos encontrados"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "produtos",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "microvix_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.codigo }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        10992,
+        -96
+      ],
+      "id": "7df6423b-20ca-4e17-b759-4cc567b37bc9",
+      "name": "Procurar produto",
+      "credentials": {
+        "supabaseApi": {
+          "id": "D3sjcqUXg63iS7HA",
+          "name": "Mundo Verde"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3DFEBE36A1E1508087A00A1EFCACDE10/token/9C5113FC16177AAF095B4B8F/send-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "=55{{ $('Converter Intenção em Índice').item.json.telefone }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('Verificar produtos encontrados').item.json.mensagem }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9e60ade2-5a7d-4cb0-9651-cc168dbfab3a",
+      "name": "(Z-API) Enviar Mensagem3",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        11600,
+        64
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "KvCDLSGblTBp6Bka",
+          "name": "Z-API Tutorial NoCOde"
+        }
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        11792,
+        64
+      ],
+      "id": "1ab4ddf7-344f-4670-a623-b61d117a8b5d",
+      "name": "No Operation, do nothing9",
+      "notes": "TEMPLATE DESENVOLVIDO POR NOCODE STARTUP\nhttps://nocodestartup.io/\n\nFORMAÇÃO GESTOR DE AGENTES DE IA:\nhttps://nocodestartup.io/formacao-gestor-agentes-ia/"
+    },
+    {
+      "parameters": {
+        "jsCode": "const venda = $('Criar Venda').first().json;\nconst venda_id = venda.id;\n\n// itens originais da nota\nconst itensOriginais = $items('Explodir produtos').map(item => item.json);\n\n// produtos encontrados no Supabase\nconst produtosEncontrados = $items('Procurar produto').map(item => item.json);\n\n// índice por microvix_id\nconst mapaProdutos = new Map();\nfor (const p of produtosEncontrados) {\n  const chave = String(p.microvix_id || '').trim();\n  if (chave) {\n    mapaProdutos.set(chave, p);\n  }\n}\n\nreturn itensOriginais.map(item => {\n  const codigo = String(item.codigo || '').trim();\n  const quantidade = Number(item.quantidade || 0);\n  const preco_unitario = Number(item.valor_unitario || 0);\n\n  const produto = mapaProdutos.get(codigo);\n\n  if (!produto || !produto.id) {\n    throw new Error(`Produto não encontrado para o código: ${codigo}`);\n  }\n\n  return {\n    json: {\n      venda_id,\n      produto_id: produto.id,\n      quantidade,\n      preco_unitario,\n      desconto: 0,\n      valor_total: quantidade * preco_unitario\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11664,
+        -144
+      ],
+      "id": "1f00a47c-5108-4720-ab8f-b3c09154b93d",
+      "name": "Montar Itens Finais"
+    },
+    {
+      "parameters": {
+        "tableId": "itens_venda",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "venda_id",
+              "fieldValue": "={{ $('Criar Venda').first().json.id }}"
+            },
+            {
+              "fieldId": "produto_id",
+              "fieldValue": "={{ $json.produto_id }}"
+            },
+            {
+              "fieldId": "quantidade",
+              "fieldValue": "={{ $json.quantidade }}"
+            },
+            {
+              "fieldId": "preco_unitario",
+              "fieldValue": "={{ $json.preco_unitario }}"
+            },
+            {
+              "fieldId": "valor_total",
+              "fieldValue": "={{ $json.valor_total }}"
+            },
+            {
+              "fieldId": "desconto",
+              "fieldValue": "={{ $json.desconto }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        11824,
+        -144
+      ],
+      "id": "cacb0e06-a122-4045-9642-e29288133143",
+      "name": "Cadastro dos itens da venda",
+      "credentials": {
+        "supabaseApi": {
+          "id": "D3sjcqUXg63iS7HA",
+          "name": "Mundo Verde"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3e0193e4-8943-41a9-aaf8-c9b85d044733",
+              "leftValue": "={{ $json.todos_encontrados }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        11408,
+        -96
+      ],
+      "id": "d108a5d4-ad11-499f-a05e-4452ce6aea3f",
+      "name": "Produtos encontrados?"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Buscar vendas Microvix",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Venda": {
+      "main": [
+        [
+          {
+            "node": "Preparar Itens Venda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Itens Venda": {
+      "main": [
+        [
+          {
+            "node": "Explodir produtos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explodir produtos": {
+      "main": [
+        [
+          {
+            "node": "Procurar produto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar produtos encontrados": {
+      "main": [
+        [
+          {
+            "node": "Produtos encontrados?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procurar produto": {
+      "main": [
+        [
+          {
+            "node": "Verificar produtos encontrados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "(Z-API) Enviar Mensagem3": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Itens Finais": {
+      "main": [
+        [
+          {
+            "node": "Cadastro dos itens da venda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cadastro dos itens da venda": {
+      "main": [
+        []
+      ]
+    },
+    "Produtos encontrados?": {
+      "main": [
+        [
+          {
+            "node": "Montar Itens Finais",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "(Z-API) Enviar Mensagem3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "23a052cb-9d82-420a-9a7d-d3128282f223",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "53f6b7e07318319721b1ec8dbac58f486a49cd122513114117377dccf7fc17a0"
+  },
+  "id": "tu5QyokiUIdzG7Jc",
+  "tags": [
+    {
+      "updatedAt": "2026-03-19T17:15:54.547Z",
+      "createdAt": "2026-03-19T17:15:54.547Z",
+      "id": "6Jq6PP6Ierj2roEk",
+      "name": "Mundo Verde"
+    }
+  ]
+}

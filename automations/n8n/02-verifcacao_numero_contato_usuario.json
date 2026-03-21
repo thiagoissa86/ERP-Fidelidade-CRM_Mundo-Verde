@@ -1,0 +1,242 @@
+{
+  "name": "MV-Verifica número de contato",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Formatos Base64\nBase64 é uma forma de codificar dados binários como texto. Dependendo do tipo de arquivo, os prefixos variam para indicar o formato do dado. Aqui estão alguns dos formatos mais comuns com os respectivos prefixos base64:\n\n### 1. **Imagem**\n   - **PNG**: `data:image/png;base64,`\n   - **JPEG**: `data:image/jpeg;base64,`\n   - **GIF**: `data:image/gif;base64,`\n   - **SVG**: `data:image/svg+xml;base64,`\n   - **BMP**: `data:image/bmp;base64,`\n   \n### 2. **Áudio**\n   - **MP3**: `data:audio/mp3;base64,`\n   - **WAV**: `data:audio/wav;base64,`\n   - **OGG**: `data:audio/ogg;base64,`\n   - **MPEG**: `data:audio/mpeg;base64,`\n\n### 3. **Vídeo**\n   - **MP4**: `data:video/mp4;base64,`\n   - **OGG**: `data:video/ogg;base64,`\n   - **WebM**: `data:video/webm;base64,`\n\n### 4. **Texto**\n   - **Plain Text**: `data:text/plain;base64,`\n   - **HTML**: `data:text/html;base64,`\n   - **CSS**: `data:text/css;base64,`\n   - **JavaScript**: `data:text/javascript;base64,`\n   - **CSV**: `data:text/csv;base64,`\n\n### 5. **Documentos**\n   - **PDF**: `data:application/pdf;base64,`\n   - **JSON**: `data:application/json;base64,`\n   - **ZIP**: `data:application/zip;base64,`\n   - **XML**: `data:application/xml;base64,`\n\nEsses são exemplos de prefixos que podem ser usados ao incluir dados base64 em documentos ou aplicações.",
+        "height": 1166,
+        "width": 593,
+        "color": 7
+      },
+      "id": "224563e5-a8f9-4ec2-913b-eee7de8972e0",
+      "name": "Sticky Note15",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        1584
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## MimeTypes\nO Mime type é o mecanismo para especificar o tipo de documento.\nA estrutura de um MIME type é muito simples; Consiste de um tipo e um subtipo, separados por um '/', onde nenhum espaço é permitido. \nO tipo representa a categoria. \nO subtipo é específico para cada tipo.\n\n### 1. **image**\nRepresenta qualquer tipo de imagens\n- image/gif\n- image/png\n- image/jpeg\n- image/bmp\n- image/webp\n   \n\n### 2. **audio**\nRepresenta qualquer tipo de arquivo de audio\n- audio/midi\n- audio/mpeg\n- audio/webm\n- audio/ogg\n- audio/wav\n- audio/mp3\n- audio/mp4\n\n### 3. **video**\nRepresenta qualquer tipo de arquivo de video\n- video/webm\n- video/ogg\n- video/mp4\n\n### 4. **text**\nRepresenta qualquer documento que contenha texto\n- text/plain\n- text/csv\n- text/html\n- text/css\n- text/javascript\n\n### 5. **application**\nRepresenta qualquer tipo de dados binários.\n- application/octet-stream\n- application/pkcs12\n- application/vnd.mspowerpoint\n- application/xhtml+xml\n- application/xml\n- application/pdf3",
+        "height": 1166,
+        "width": 593,
+        "color": 7
+      },
+      "id": "8d4ee6fb-344e-4830-ab21-6c530c107857",
+      "name": "Sticky Note16",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1584
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Verificar número contato\n",
+        "height": 540,
+        "width": 1044,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6096,
+        560
+      ],
+      "id": "d2461b36-9bd0-40bc-b91a-b339100a180b",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6405f9af-55bc-4700-9475-62da75097942",
+              "leftValue": "={{ $('Webhook').item.json.body.phone }}",
+              "rightValue": "5522997045005",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        6128,
+        752
+      ],
+      "id": "b77a887a-2596-4e03-828d-c22f9d2f3206",
+      "name": "Verificar Número Alvo"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Mensagem1').item.json.message }}",
+        "options": {
+          "systemMessage": "Você é um classificador de intenção para a loja Mundo Verde.\n\nClassifique a mensagem do cliente em apenas UMA das categorias abaixo:\n\n- cadastro\n- ajuda_compra\n- cupom_fiscal\n- consulta_fidelidade\n- acompanhamento_pedido\n- outro\n\nDefinições:\n\ncadastro\nquando o cliente quer se cadastrar, entrar em programa, registrar CPF ou criar cadastro.\n\najuda_compra\nquando o cliente quer recomendação de produto, tirar dúvidas, saber o que comprar ou pedir sugestão.\n\ncupom_fiscal\nquando o cliente envia cupom, nota fiscal ou CPF para registrar compra.\n\nconsulta_fidelidade\nquando pergunta sobre pontos, saldo, cashback ou crédito.\n\nacompanhamento_pedido\nquando pergunta sobre pedido, entrega, status ou reserva.\n\noutro\nquando não se encaixa nas categorias acima.\n\nRetorne SOMENTE JSON válido neste formato:\n\n{\n \"intencao\": \"\",\n \"confianca\": 0,\n \"motivo\": \"\"\n}\n\nMensagem do cliente:\n{{ $('Mensagem1').item.json.message }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        6400,
+        592
+      ],
+      "id": "afcc8032-b6e4-4044-a3b8-65ff4eae1695",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        6384,
+        768
+      ],
+      "id": "d561fde1-ec45-4a93-be9e-1b06e4065b9d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "1X3ymJUEqNXdHGie",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 5,
+        "output": "={{ $json.indice_saida }}"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        6880,
+        688
+      ],
+      "id": "fbc860e8-7ef0-4de5-9808-b9ea465164b6",
+      "name": "Roteador de Intenção"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.output || $json.saida || \"\";\n\n// tenta parsear a saída do classificador\nlet data = raw;\nif (typeof raw === \"string\") {\n  try {\n    data = JSON.parse(raw);\n  } catch (e) {\n    data = {};\n  }\n}\n\n// texto real para extrair cadastro\nconst textoCadastro =\n  $json.mensagem_usuario ||\n  $('Code in JavaScript').first().json.mensagem_usuario ||\n  $('Mensagem1').first().json.message ||\n  \"\";\n\n// Nome\nconst nomeMatch = textoCadastro.match(/nome\\s*:\\s*(.+)/i);\nconst nome = nomeMatch ? nomeMatch[1].split('\\n')[0].trim() : null;\n\n// CPF\nconst cpfMatch = textoCadastro.match(/cpf\\s*:\\s*([\\d.\\-]+)/i);\nconst cpf = cpfMatch ? cpfMatch[1].replace(/\\D/g, '') : null;\n\n// Telefone\nconst telMatch = textoCadastro.match(/telefone\\s*:\\s*([\\d()\\s\\-+]+)/i);\nconst telefone = telMatch ? telMatch[1].replace(/\\D/g, '') : null;\n\n// Data de nascimento\nconst nascMatch = textoCadastro.match(/(data\\s*de\\s*nascimento|nascimento)\\s*:\\s*([0-9\\/\\-]+)/i);\nconst data_nascimento = nascMatch ? nascMatch[2] : null;\n\n// intenção\nconst intencao = (data.intencao || \"\").trim().toLowerCase();\n\nlet indice_saida = 4;\nif (intencao === \"cadastro\") indice_saida = 0;\nelse if (intencao === \"ajuda_compra\") indice_saida = 1;\nelse if (intencao === \"cupom_fiscal\") indice_saida = 2;\nelse if (intencao === \"consulta_fidelidade\") indice_saida = 3;\n\nreturn [\n  {\n    json: {\n      ...$json,\n      intencao,\n      indice_saida,\n      nome,\n      cpf,\n      telefone,\n      data_nascimento\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6704,
+        736
+      ],
+      "id": "3f7fc99e-b907-406a-a55b-8332edd4baaf",
+      "name": "Converter Intenção em Índice"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Buscar vendas Microvix",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Número Alvo": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Converter Intenção em Índice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converter Intenção em Índice": {
+      "main": [
+        [
+          {
+            "node": "Roteador de Intenção",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Roteador de Intenção": {
+      "main": [
+        [],
+        [],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "3a25b7d8-76ad-49ff-983e-1593184e3875",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "53f6b7e07318319721b1ec8dbac58f486a49cd122513114117377dccf7fc17a0"
+  },
+  "id": "ZAhdg17WZTyE2Net",
+  "tags": [
+    {
+      "updatedAt": "2026-03-19T17:15:54.547Z",
+      "createdAt": "2026-03-19T17:15:54.547Z",
+      "id": "6Jq6PP6Ierj2roEk",
+      "name": "Mundo Verde"
+    }
+  ]
+}
