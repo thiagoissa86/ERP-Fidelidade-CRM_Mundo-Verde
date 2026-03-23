@@ -191,6 +191,7 @@ export type Database = {
           id: string
           nome_completo: string
           telefone: string | null
+          telefone_normalizado: string | null
         }
         Insert: {
           aceita_marketing?: boolean
@@ -204,6 +205,7 @@ export type Database = {
           id?: string
           nome_completo: string
           telefone?: string | null
+          telefone_normalizado?: string | null
         }
         Update: {
           aceita_marketing?: boolean
@@ -217,6 +219,7 @@ export type Database = {
           id?: string
           nome_completo?: string
           telefone?: string | null
+          telefone_normalizado?: string | null
         }
         Relationships: []
       }
@@ -782,6 +785,7 @@ export type Database = {
           preco_venda: number | null
           produtos_relacionados: string[] | null
           publico_indicado: string | null
+          search_vector: unknown
           site_oficial_marca: string | null
           sku: string | null
         }
@@ -804,6 +808,7 @@ export type Database = {
           preco_venda?: number | null
           produtos_relacionados?: string[] | null
           publico_indicado?: string | null
+          search_vector?: unknown
           site_oficial_marca?: string | null
           sku?: string | null
         }
@@ -826,6 +831,7 @@ export type Database = {
           preco_venda?: number | null
           produtos_relacionados?: string[] | null
           publico_indicado?: string | null
+          search_vector?: unknown
           site_oficial_marca?: string | null
           sku?: string | null
         }
@@ -1098,6 +1104,10 @@ export type Database = {
       }
     }
     Functions: {
+      recalcular_carteira_fidelidade: {
+        Args: { p_carteira_id: string }
+        Returns: undefined
+      }
       usuario_tem_perfil: { Args: { perfil_buscado: string }; Returns: boolean }
       usuario_tem_um_dos_perfis: {
         Args: { perfis: string[] }
